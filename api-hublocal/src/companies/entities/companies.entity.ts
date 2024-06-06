@@ -20,7 +20,7 @@ export class Companies extends AbstractEntity<Companies> {
     referencedColumnName: 'id',
     foreignKeyConstraintName: 'fk_user_id',
   })
-  user: Users;
+  user: number;
 
   @OneToMany(() => Locations, (location) => location.company, {
     cascade: false,

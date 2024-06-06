@@ -1,6 +1,13 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
-export class UpdateLocationDto {
+export class LocationDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
@@ -42,4 +49,9 @@ export class UpdateLocationDto {
   @MinLength(2)
   @MaxLength(255)
   state: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  company_id: number;
 }

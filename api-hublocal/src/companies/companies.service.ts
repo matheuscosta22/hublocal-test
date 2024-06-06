@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
+import { CompanyDto } from './dto/create-company.dto';
 import { Companies } from './entities/companies.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import {
@@ -18,10 +16,9 @@ export class CompaniesService {
     @InjectRepository(Companies)
     private readonly companiesRepository: Repository<Companies>,
     private readonly entityManager: EntityManager,
-    private jwtService: JwtService,
   ) {}
   async create(
-    createCompanyDto: CreateCompanyDto,
+    createCompanyDto: CompanyDto,
     request: Request,
   ): Promise<Companies> {
     const company = new Companies({
@@ -55,9 +52,21 @@ export class CompaniesService {
       .getOne();
   }
 
-  // update(id: number, updateCompanyDto: UpdateCompanyDto) {
-  //   return `This action updates a #${id} company`;
-  // }
+  async update(id: number, data: CompanyDto, request: Request) {
+    await this.companiesRepository
+      .createQueryBuilder('companies')
+      .andWhere('companies.id = :id', { id: id })
+      .andWhere('companies.user_id = :user_id', {
+        user_id: request['user'].sub,
+      })
+      .update()
+      .set({
+        name: data.name,
+        website: data.website,
+        cnpj: data.cnpj,
+      })
+      .execute();
+  }
 
   remove(request: Request, id: number): void {
     this.companiesRepository

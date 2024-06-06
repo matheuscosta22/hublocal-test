@@ -1,12 +1,12 @@
 import {
-  IsEmail,
   IsNotEmpty,
   IsString,
+  Length,
   MaxLength,
   MinLength,
 } from 'class-validator';
 
-export class CreateCompanyDto {
+export class CompanyDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
@@ -15,12 +15,10 @@ export class CreateCompanyDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsEmail()
   website: string;
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
-  @MaxLength(50)
+  @Length(14)
   cnpj: string;
 }

@@ -31,5 +31,5 @@ export class Locations extends AbstractEntity<Locations> {
     referencedColumnName: 'id',
     foreignKeyConstraintName: 'fk_company_id',
   })
-  company: Companies;
+  company: number;
 }

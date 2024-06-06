@@ -1,34 +1,100 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpCode,
+  Req,
+  Res,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { LocationsService } from './locations.service';
-import { CreateLocationDto } from './dto/create-location.dto';
+import { LocationDto } from './dto/location.dto';
+import { Request, Response } from 'express';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { CompaniesService } from 'src/companies/companies.service';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Controller('locations')
+@UseGuards(AuthGuard)
 export class LocationsController {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(
+    private readonly locationsService: LocationsService,
+    private readonly companiesService: CompaniesService,
+  ) {}
 
-  // @Post()
-  // create(@Body() createLocationDto: CreateLocationDto) {
-  //   return this.locationsService.create(createLocationDto);
-  // }
+  @Post()
+  @HttpCode(201)
+  async create(
+    @Body() data: LocationDto,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const companyIsFromAuthenticatedUser = await this.companiesService.findOne(
+      request,
+      +data.company_id,
+    );
+    if (!companyIsFromAuthenticatedUser) {
+      return response.status(401).send();
+    }
 
-  // @Get()
-  // findAll() {
-  //   return this.locationsService.findAll();
-  // }
+    return response.status(201).send(await this.locationsService.create(data));
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.locationsService.findOne(+id);
-  // }
+  @Get(':id')
+  async findOne(
+    @Param('id') id: string,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const location = await this.locationsService.findOneWithCompany(
+      +id,
+      request['user'].sub,
+    );
+    if (!location) {
+      return response.status(401).send();
+    }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-  //   return this.locationsService.update(+id, updateLocationDto);
-  // }
+    return response.status(200).send(location);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.locationsService.remove(+id);
-  // }
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateLocationDto,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const location = await this.locationsService.findOneWithCompany(
+      +id,
+      request['user'].sub,
+    );
+    if (!location) {
+      return response.status(401).send();
+    }
+
+    await this.locationsService.update(+id, data);
+    return response.status(200).send();
+  }
+
+  @Delete(':id')
+  async remove(
+    @Param('id') id: string,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const location = await this.locationsService.findOneWithCompany(
+      +id,
+      request['user'].sub,
+    );
+    if (!location) {
+      return response.status(401).send();
+    }
+
+    this.locationsService.remove(+id);
+    return response.status(200).send();
+  }
 }

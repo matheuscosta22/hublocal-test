@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -13,9 +12,10 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateCompanyDto } from './dto/create-company.dto';
+import { CompanyDto } from './dto/create-company.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Request, Response } from 'express';
 
@@ -27,7 +27,7 @@ export class CompaniesController {
   @Post()
   @HttpCode(201)
   async create(
-    @Body() data: CreateCompanyDto,
+    @Body() data: CompanyDto,
     @Req() request: Request,
     @Res() response: Response,
   ) {
@@ -66,10 +66,16 @@ export class CompaniesController {
       .send(await this.companiesService.findOne(request, +id));
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
-  //   return this.companiesService.update(+id, updateCompanyDto);
-  // }
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: CompanyDto,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    await this.companiesService.update(+id, data, request);
+    return response.status(200).send();
+  }
 
   @Delete(':id')
   remove(
