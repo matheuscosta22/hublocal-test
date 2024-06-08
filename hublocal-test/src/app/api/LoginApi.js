@@ -1,5 +1,6 @@
-import axios from "axios";
+"use client";
 import { Bounce, toast } from "react-toastify";
+import api from "./Api";
 
 function notifyFail(message = "Não foi possível efetuar login") {
   toast.error(message, {
@@ -16,9 +17,10 @@ function notifyFail(message = "Não foi possível efetuar login") {
 }
 
 export default async function LoginApi(email, password) {
+
   try {
-    const response = await axios.post(
-      "http://localhost:8000/login",
+    const response = await api.post(
+      "/login",
       {
         email: email,
         password: password,
@@ -43,18 +45,14 @@ export default async function LoginApi(email, password) {
         transition: Bounce,
       });
 
-      console.log(response.data.access_token);
       localStorage.setItem("token", response.data.access_token);
-      return;
+      return true;
     } else {
-      if (response.status == 422) {
-        console.log(response.data);
-      }
-
       notifyFail();
     }
   } catch (err) {
     console.log(err);
     notifyFail();
   }
+  return false;
 }

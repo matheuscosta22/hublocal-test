@@ -8,6 +8,7 @@ import {
   IPaginationOptions,
   Pagination,
   paginate,
+  paginateRaw,
 } from 'nestjs-typeorm-paginate';
 
 @Injectable()
@@ -40,6 +41,26 @@ export class CompaniesService {
       .where('companies.user_id = :user_id', { user_id: request['user'].sub });
 
     return await paginate<Companies>(queryBuilder, options);
+  }
+
+  async findAllWithCountLocations(
+    options: IPaginationOptions,
+    request: Request,
+  ): Promise<Pagination<Companies>> {
+    const queryBuilder = this.companiesRepository
+      .createQueryBuilder('companies')
+      .where('companies.user_id = :user_id', { user_id: request['user'].sub })
+      .leftJoin('companies.locations', 'location')
+      .groupBy('companies.id')
+      .select([
+        'companies.id as id',
+        'companies.name as name',
+        'companies.website as website',
+        'companies.cnpj as cnpj',
+      ])
+      .addSelect('COUNT(location)::INTEGER', 'count_locations');
+
+    return await paginateRaw<Companies>(queryBuilder, options);
   }
 
   async findOne(request: Request, id: number): Promise<Companies> {

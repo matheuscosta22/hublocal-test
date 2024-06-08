@@ -1,5 +1,7 @@
+"use client";
 import axios from "axios";
 import { Bounce, toast } from "react-toastify";
+import api from "./Api";
 
 function notifyFail(message = "Não foi possível efetuar o registro") {
   toast.error(message, {
@@ -17,8 +19,8 @@ function notifyFail(message = "Não foi possível efetuar o registro") {
 
 export default async function ResgisterApi(name, email, password) {
   try {
-    const response = await axios.post(
-      "http://localhost:8000/users",
+    const response = await api.post(
+      "/users",
       {
         name: name,
         email: email,
@@ -43,19 +45,16 @@ export default async function ResgisterApi(name, email, password) {
         theme: "light",
         transition: Bounce,
       });
-
-      return;
     } else {
       notifyFail();
     }
+    return response;
   } catch (err) {
-    if (
-      err.response.status == 422 &&
-      err.response?.data.error == "User alredy exists"
-    ) {
+    if (err.status == 422 && err?.data.error == "User alredy exists") {
       notifyFail("Email já utilizado");
     } else {
       notifyFail();
     }
+    return err;
   }
 }

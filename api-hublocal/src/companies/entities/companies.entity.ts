@@ -23,7 +23,7 @@ export class Companies extends AbstractEntity<Companies> {
   user: number;
 
   @OneToMany(() => Locations, (location) => location.company, {
-    cascade: false,
+    cascade: true,
   })
   locations: Locations[];
 }

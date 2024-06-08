@@ -1,8 +1,5 @@
 "use client";
 import * as React from "react";
-// import Button from "@mui/material/Button";
-// import TextField from "@mui/material/TextField";
-// import Image from "next/image";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
@@ -14,6 +11,7 @@ import { registerValidationSchema } from "../validationSchemas/registerValidatio
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ResgisterApi from "../api/RegisterApi";
+import { useRouter } from "next/navigation";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -41,11 +39,20 @@ export default function Register() {
     resolver: yupResolver(registerValidationSchema),
   });
 
+  const router = useRouter();
+  const [redirect, setRedirect] = React.useState(0);
+
   React.useEffect(() => {
     if (Object.values(errors)[0]?.message) {
       notifyError();
     }
   }, [Object.values(errors)[0]?.message]);
+
+  React.useEffect(() => {
+    if (redirect == true) {
+      router.push("/login");
+    }
+  }, [redirect]);
 
   function notifyError() {
     if (Object.values(errors)[0]?.message) {
@@ -63,8 +70,11 @@ export default function Register() {
     }
   }
 
-  const onSubmit = (data) => {
-    ResgisterApi(data.name, data.email, data.password);
+  const onSubmit = async (data) => {
+    const response = await ResgisterApi(data.name, data.email, data.password);
+    if (response.status == 401) {
+      setRedirect(1);
+    }
   };
 
   return (
@@ -214,7 +224,7 @@ export default function Register() {
                       variant="contained"
                       sx={{ mt: 3 }}
                     >
-                      Registrar
+                      Salvar
                     </Button>
 
                     <Button
@@ -234,91 +244,5 @@ export default function Register() {
         </Container>
       </ThemeProvider>
     </div>
-
-    // <ThemeProvider theme={defaultTheme}>
-    //   <Container component="main">
-    //     <Grid container direction="row">
-    //       <Grid item justifyContent="start">
-    //         <div
-    //           style={{ backgroundColor: "#0485FF", width: 600, height: 500 }}
-    //         >
-    //           <Image src="/hublocal-login-image.png" width={600} height={500} />
-    //         </div>
-    //       </Grid>
-    //   <Grid
-    //     container
-    //     maxWidth={500}
-    //     justifyContent="center"
-    //     alignItems="center"
-    //   >
-    //     <Grid item xs={12} sx={{ backgroundColor: "#f0f0f0", padding: 20 }}>
-    //       <Image src="/hublocal-logo.png" width={400} height={150} />
-    //       <Grid container justifyContent="flex-start" spacing={2} mt={2}>
-    //         <Grid item xs={4} md={8}>
-    //           <TextField
-    //             autoComplete="given-name"
-    //             name="firstName"
-    //             required
-    //             fullWidth
-    //             id="firstName"
-    //             label="First Name"
-    //             autoFocus
-    //           />
-    //         </Grid>
-    //         <Grid item xs={4} md={8}>
-    //           <TextField
-    //             required
-    //             fullWidth
-    //             id="lastName"
-    //             label="Last Name"
-    //             name="lastName"
-    //             autoComplete="family-name"
-    //           />
-    //         </Grid>
-    //         <Grid item xs={4} md={8}>
-    //           <TextField
-    //             required
-    //             fullWidth
-    //             id="email"
-    //             label="Email Address"
-    //             name="email"
-    //             autoComplete="email"
-    //           />
-    //         </Grid>
-    //         <Grid item xs={4} md={8}>
-    //           <TextField
-    //             required
-    //             fullWidth
-    //             name="password"
-    //             label="Password"
-    //             type="password"
-    //             id="password"
-    //             autoComplete="new-password"
-    //           />
-    //         </Grid>
-    //         <Grid item xs={12} md={8}>
-    //           <Button
-    //             variant="contained"
-    //             color="primary"
-    //             sx={{ borderRadius: 5, mt: 2 }}
-    //           >
-    //             Registrar
-    //           </Button>
-    //         </Grid>
-    //         <Grid item xs={12} md={8}>
-    //           <Button
-    //             variant="contained"
-    //             color="primary"
-    //             sx={{ borderRadius: 5, mt: 2 }}
-    //           >
-    //             Login
-    //           </Button>
-    //         </Grid>
-    //       </Grid>
-    //     </Grid>
-    //       </Grid>
-    //     </Grid>
-    //   </Container>
-    // </ThemeProvider>
   );
 }

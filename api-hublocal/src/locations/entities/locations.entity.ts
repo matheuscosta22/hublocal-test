@@ -25,7 +25,7 @@ export class Locations extends AbstractEntity<Locations> {
   @Column()
   state: string;
 
-  @ManyToOne(() => Companies)
+  @ManyToOne(() => Companies, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'company_id',
     referencedColumnName: 'id',

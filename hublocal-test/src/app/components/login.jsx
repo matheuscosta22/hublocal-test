@@ -1,8 +1,5 @@
 "use client";
 import * as React from "react";
-// import Button from "@mui/material/Button";
-// import TextField from "@mui/material/TextField";
-// import Image from "next/image";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
@@ -14,6 +11,7 @@ import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginValidationSchema } from "../validationSchemas/loginValidationSchema ";
 import LoginApi from "../api/LoginApi";
+import { useRouter } from "next/navigation";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -40,12 +38,20 @@ export default function Login() {
     },
     resolver: yupResolver(loginValidationSchema),
   });
+  const router = useRouter();
+  const [redirect, setRedirect] = React.useState(0);
 
   React.useEffect(() => {
     if (Object.values(errors)[0]?.message) {
       notifyError();
     }
   }, [Object.values(errors)[0]?.message]);
+
+  React.useEffect(() => {
+    if (redirect == true && localStorage.getItem("token")) {
+      router.push("/companies");
+    }
+  }, [redirect]);
 
   function notifyError() {
     if (Object.values(errors)[0]?.message) {
@@ -63,8 +69,10 @@ export default function Login() {
     }
   }
 
-  const onSubmit = (data) => {
-    LoginApi(data.email, data.password);
+  const onSubmit = async (data) => {
+    if (await LoginApi(data.email, data.password)) {
+      setRedirect(1);
+    }
   };
 
   return (
@@ -183,7 +191,7 @@ export default function Login() {
                       variant="contained"
                       sx={{ mt: 3 }}
                     >
-                      Registrar
+                      Cadastrar usuário
                     </Button>
                   </Grid>
                 </Grid>

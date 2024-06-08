@@ -55,6 +55,25 @@ export class CompaniesController {
     );
   }
 
+  @Get('/count-locations')
+  async findAllWithCountLocations(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    return response.status(200).send(
+      await this.companiesService.findAllWithCountLocations(
+        {
+          page,
+          limit,
+          route: '/companies/count-locations',
+        },
+        request,
+      ),
+    );
+  }
+
   @Get(':id')
   async findOne(
     @Param('id') id: string,
